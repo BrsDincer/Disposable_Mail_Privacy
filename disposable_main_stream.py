@@ -1,7 +1,5 @@
 import streamlit as st,requests,json
 import random
-from stem.control import Controller
-from flask import Flask
 
 
 
@@ -120,7 +118,7 @@ class GET_DOCUMENT():
     def GET_USER_AGENT():
         try:
             list_tar = []
-            f_op = open("user_agent_all.json")
+            f_op = open("C:\\Users\\Asus\\Desktop\\user_agent_all.json")
             j_op = json.loads(f_op.read())
             for x_value in j_op["user_agents"]:
                 for ix_values in j_op["user_agents"][x_value]:
@@ -149,7 +147,7 @@ class GET_DOCUMENT():
         try:
             list_agent = GET_DOCUMENT.GET_USER_AGENT()
             random_agent = random.choice(list_agent)
-            ref_ex_list = GET_DOCUMENT.READING_FILE("ref_list.txt")
+            ref_ex_list = GET_DOCUMENT.READING_FILE("C:\\Users\\Asus\\Desktop\\ref_list.txt")
             ref_all = random.choice(ref_ex_list)
             date_day = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]
             date_month = ["Jan","Feb","Mar","Apr","Aug","Sep","Oct","Nov","Dec"]
@@ -197,7 +195,6 @@ class DEFINE_BUTTON():
             s_t.c(new_mail)
             s_t.tx(CREATOR_MESSAGE.SIDE_PRINT())
         s_t.md(HTML_TYPE.ST_MARKDOWN_M("READ THE MESSAGE"),unsafe_allow_html=True)
-        tor_agree = s_t.cb("USE TOR CONNECTION TO READ MESSAGE")
         mess_tx = "[>] You can try the button again until the message arrives"
         mess_tx += "\n"
         mess_tx += "[>] Remember that message will be deleted when you read"
@@ -207,88 +204,31 @@ class DEFINE_BUTTON():
         user_input = s_t.ta("WRITE YOUR DISPOSABLE MAIL ADDRESS",
                             help="WRITE YOUR DISPOSABLE MAIL ADDRESS").replace(" ","")
         target_read_button=st.button(title_two)
-        if tor_agree == False:
-            if target_read_button:
-                try:
-                    cont_before_mail = f"http://api.guerrillamail.com/ajax.php?f=set_email_user&email_user={str(user_input)}"
-                    check_mail = "http://api.guerrillamail.com/ajax.php?f=check_email&seq=1"
-                    header_target = GET_DOCUMENT.GET_HEADER()
-                    r_q = requests.Session()
-                    r_q.get(cont_before_mail)
-                    get_mail = json.loads(r_q.get(check_mail,headers=header_target).text)
-                    mail_id = get_mail['list'][0]['mail_id']
-                    fetch_mail_on = f"http://api.guerrillamail.com/ajax.php?f=fetch_email&email_id={mail_id}"
-                    fetch_get = r_q.get(fetch_mail_on)
-                    fetch_json = json.loads(fetch_get.text)
-                    s_t.tx("[>] Be sure to save the message before closing or refreshing the page")
-                    s_t.tx("[>] COMPLETED")
-                    s_t.tx(f"MAIL FROM: {fetch_json['mail_from']}")
-                    s_t.tx(f"MAIL SUBJECT: {fetch_json['mail_subject']}")
-                    s_t.md(fetch_json["mail_body"],
-                           unsafe_allow_html=True)
-                    delete_mail = f"http://api.guerrillamail.com/ajax.php?f=del_email&email_ids[]={mail_id}"
-                    r_q.get(delete_mail)
-                    i_s.i("MAIL HAS BEEN DELETED")
-                    r_q.close()
-                except:
-                    i_s.w("MAIL MAY BE DELETED OR NOT YET AVAILABLE, CHECK LATER")
-        else:
-            if target_read_button:
-                try:
-                    cont_before_mail = f"http://api.guerrillamail.com/ajax.php?f=set_email_user&email_user={str(user_input)}"
-                    check_mail = "http://api.guerrillamail.com/ajax.php?f=check_email&seq=1"
-                    header_target = GET_DOCUMENT.GET_HEADER()
-                    r_q = requests.Session()
-                    r_q.get(cont_before_mail)
-                    get_mail = json.loads(r_q.get(check_mail,headers=header_target).text)
-                    mail_id = get_mail['list'][0]['mail_id']
-                    fetch_mail_on = f"http://api.guerrillamail.com/ajax.php?f=fetch_email&email_id={mail_id}"
-                    fetch_get = r_q.get(fetch_mail_on)
-                    fetch_json = json.loads(fetch_get.text)
-                    s_t.tx("[>] Be sure to save the message before closing or refreshing the page")
-                    s_t.tx("[>] Please wait for onion site connection")
-                    s_t.tx("[>] The site extension will appear below")
-                    html_main = """
-                    <!DOCTYPE html>
-                    <html lang="en">
-                    <head>
-                    <meta name="viewport" content="width=device-width">
-                    <title>IIPV</title>
-                    </head>
-                    <body>
-                    <div>
-                    <h3>%s</h3>
-                    <h3>%s</h3>
-                    <p>%s</p>
-                    </div>
-                    </body>
-                    </html>
-                    """%(fetch_json['mail_from'],fetch_json['mail_subject'],fetch_json["mail_body"])
-                    app = Flask(__name__,template_folder="template")
-                    @app.route("/")
-                    def root_enter():
-                        try:
-                            return html_main
-                        except Exception as err:
-                            s_t.tx(str(err))
-                    with Controller.from_port() as Controller_Stem:
-                        Controller_Stem.authenticate()
-                        onion_get = Controller_Stem.create_ephemeral_hidden_service({80:5000},
-                                                                                    await_publication = True)
-                        s_t.tx(f"{onion_get.service_id}.onion")
-                        try:
-                            app.run(debug=False)
-                        except:
-                            i_s.w("SERVER HAS BEEN DOWN")
-                            delete_mail = f"http://api.guerrillamail.com/ajax.php?f=del_email&email_ids[]={mail_id}"
-                            r_q.get(delete_mail)
-                            i_s.i("MAIL HAS BEEN DELETED")
-                            r_q.close()
-                except Exception as err:
-                    s_t.tx(str(err))
-                    i_s.w("MAIL MAY BE DELETED OR NOT YET AVAILABLE, CHECK LATER")
+        if target_read_button:
+            try:
+                cont_before_mail = f"http://api.guerrillamail.com/ajax.php?f=set_email_user&email_user={str(user_input)}"
+                check_mail = "http://api.guerrillamail.com/ajax.php?f=check_email&seq=1"
+                header_target = GET_DOCUMENT.GET_HEADER()
+                r_q = requests.Session()
+                r_q.get(cont_before_mail)
+                get_mail = json.loads(r_q.get(check_mail,headers=header_target).text)
+                mail_id = get_mail['list'][0]['mail_id']
+                fetch_mail_on = f"http://api.guerrillamail.com/ajax.php?f=fetch_email&email_id={mail_id}"
+                fetch_get = r_q.get(fetch_mail_on)
+                fetch_json = json.loads(fetch_get.text)
+                s_t.tx("[>] Be sure to save the message before closing or refreshing the page")
+                s_t.tx("[>] COMPLETED")
+                s_t.tx(f"MAIL FROM: {fetch_json['mail_from']}")
+                s_t.tx(f"MAIL SUBJECT: {fetch_json['mail_subject']}")
+                s_t.md(fetch_json["mail_body"],
+                          unsafe_allow_html=True)
+                delete_mail = f"http://api.guerrillamail.com/ajax.php?f=del_email&email_ids[]={mail_id}"
+                r_q.get(delete_mail)
+                i_s.i("MAIL HAS BEEN DELETED")
+                r_q.close()
+            except:
+                i_s.w("MAIL MAY BE DELETED OR NOT YET AVAILABLE, CHECK LATER")
 
 
 CONFIGURATION_ST.ST_CONFIGURATION_DEFINE()
-# TOR_CONNECTION.START_SESSION(DEFINE_BUTTON.TWO_BUTTON("GET NEW DISPOSABLE E-MAIL","READ LAST MESSAGE"))
 DEFINE_BUTTON.TWO_BUTTON("GET NEW DISPOSABLE E-MAIL","READ LAST MESSAGE")
