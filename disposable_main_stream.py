@@ -1,5 +1,4 @@
 import streamlit as st,requests,json
-from bs4 import BeautifulSoup
 import random
 from requests.packages.urllib3.exceptions import InsecureRequestWarning 
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
@@ -172,74 +171,7 @@ class GET_DOCUMENT():
             return main_header
         except:
             pass
-        
-    def PROXY_LIST():
-        try:
-            Rand_Url_Main = "https://free-proxy-list.net/"
-            header_target = GET_DOCUMENT.GET_HEADER()
-            Soup_Main = BeautifulSoup(requests.get(Rand_Url_Main,headers=header_target).content, "html.parser")
-            IP_List = []
-            PR_List = []
-            i_count_spoof = 0
-            for tab_all in Soup_Main.find("table",class_="table table-striped table-bordered"):
-                tr_all = tab_all.find_all("tr")
-                for x_tr in tr_all:
-                    td_all = x_tr.find_all("td")
-                    for x_td in td_all:
-                        i_count_spoof += 1
-                        if i_count_spoof == 1:
-                            IP_M = x_td.text
-                            IP_List.append(str(IP_M))
-                        elif i_count_spoof == 2:
-                            PR_M = x_td.text
-                            PR_List.append(str(PR_M))
-                    i_count_spoof = 0
-            return IP_List,PR_List
-        except:
-            pass
-        
-    def FIND_TRUE_PROXY():
-        try:
-            s_t,i_s = DEFINE_ST_PARAMETERS.GET_API()
-            sc_ip_list,sc_port_list = GET_DOCUMENT.PROXY_LIST()
-            header_target = GET_DOCUMENT.GET_HEADER()
-            test_url_one = "https://httpbin.org"
-            x_stop_count = 0
-            info_message = ""
-            try:
-                if x_stop_count == 0:
-                    for x_ip,x_port in zip(sc_ip_list,sc_port_list):
-                        try:
-                            define_prx_dict = {"https":f"https://{str(x_ip)}:{str(x_port)}",
-                                               "http":f"http://{str(x_ip)}:{str(x_port)}"}
-                            rs = requests.Session()
-                            att_req = rs.get(test_url_one,headers=header_target,
-                                             proxies=define_prx_dict,
-                                             verify=False,
-                                             timeout=11)
-                            if att_req.status_code == 200:
-                                Json_Res = json.loads(att_req.text)
-                                true_prox_http = define_prx_dict["http"]
-                                true_prox_https = define_prx_dict["https"]
-                                info_message += f"IP: {Json_Res['ip']}"
-                                info_message += f"COUNTRY: {Json_Res['country']}"
-                                info_message += f"ORG: {Json_Res['org']}"
-                                info_message += f"HTTP: {true_prox_http}"
-                                info_message += f"HTTPS: {true_prox_https}"
-                                s_t.tx(info_message)
-                                rs.close()
-                                x_stop_count += 1
-                                break
-                            else:
-                                rs.close()
-                                pass
-                        except:
-                            pass
-                return true_prox_http,true_prox_https
-            except:
-                pass
-        except:
-            pass
+
 
 class SEND_REQUESTS():
     def GET_MAIL():
@@ -277,65 +209,31 @@ class DEFINE_BUTTON():
             s_t.tx(mess_tx)
             user_input = s_t.ta("WRITE YOUR DISPOSABLE MAIL ADDRESS",
                                 help="WRITE YOUR DISPOSABLE MAIL ADDRESS").replace(" ","")
-            s_t.tx("[>] USE PROXY FOR READING MESSAGE")
-            check_box_user = s_t.cb("ENABLE FOR PROXIES",
-                                    help="The process may take time to find true proxies")
             target_read_button=st.button(title_two)
             if target_read_button:
                 try:
-                    if check_box_user == False:
-                        cont_before_mail = f"http://api.guerrillamail.com/ajax.php?f=set_email_user&email_user={str(user_input)}"
-                        check_mail = "http://api.guerrillamail.com/ajax.php?f=check_email&seq=1"
-                        header_target = GET_DOCUMENT.GET_HEADER()
-                        r_q = requests.Session()
-                        r_q.get(cont_before_mail,
-                                headers=header_target)
-                        get_mail = json.loads(r_q.get(check_mail,headers=header_target).text)
-                        mail_id = get_mail['list'][0]['mail_id']
-                        fetch_mail_on = f"http://api.guerrillamail.com/ajax.php?f=fetch_email&email_id={mail_id}"
-                        fetch_get = r_q.get(fetch_mail_on,
+                    cont_before_mail = f"http://api.guerrillamail.com/ajax.php?f=set_email_user&email_user={str(user_input)}"
+                    check_mail = "http://api.guerrillamail.com/ajax.php?f=check_email&seq=1"
+                    header_target = GET_DOCUMENT.GET_HEADER()
+                    r_q = requests.Session()
+                    r_q.get(cont_before_mail,
+                            headers=header_target)
+                    get_mail = json.loads(r_q.get(check_mail,headers=header_target).text)
+                    mail_id = get_mail['list'][0]['mail_id']
+                    fetch_mail_on = f"http://api.guerrillamail.com/ajax.php?f=fetch_email&email_id={mail_id}"
+                    fetch_get = r_q.get(fetch_mail_on,
                                             headers=header_target)
-                        fetch_json = json.loads(fetch_get.text)
-                        s_t.tx("[>] Be sure to save the message before closing or refreshing the page")
-                        s_t.tx("[>] COMPLETED")
-                        s_t.tx(f"MAIL FROM: {fetch_json['mail_from']}")
-                        s_t.tx(f"MAIL SUBJECT: {fetch_json['mail_subject']}")
-                        s_t.md(fetch_json["mail_body"],
-                                  unsafe_allow_html=True)
-                        delete_mail = f"http://api.guerrillamail.com/ajax.php?f=del_email&email_ids[]={mail_id}"
-                        r_q.get(delete_mail)
-                        i_s.i("MAIL HAS BEEN DELETED")
-                        r_q.close()
-                    else:
-                        cont_before_mail = f"http://api.guerrillamail.com/ajax.php?f=set_email_user&email_user={str(user_input)}"
-                        check_mail = "http://api.guerrillamail.com/ajax.php?f=check_email&seq=1"
-                        header_target = GET_DOCUMENT.GET_HEADER()
-                        r_q = requests.Session()
-                        r_q.get(cont_before_mail,
-                                headers=header_target)
-                        get_mail = json.loads(r_q.get(check_mail,
-                                                      headers=header_target).text)
-                        mail_id = get_mail['list'][0]['mail_id']
-                        i_s.w("PROXY SEARCH MAY TAKE A LONG TIME, PLEASE WAIT")
-                        get_http,get_https = GET_DOCUMENT.FIND_TRUE_PROXY()
-                        true_proxies={"http":get_http,
-                                  "https":get_https}
-                        fetch_mail_on = f"http://api.guerrillamail.com/ajax.php?f=fetch_email&email_id={mail_id}"
-                        fetch_get = r_q.get(fetch_mail_on,
-                                            headers=header_target,
-                                            proxies=true_proxies,
-                                            verify=False)
-                        fetch_json = json.loads(fetch_get.text)
-                        s_t.tx("[>] Be sure to save the message before closing or refreshing the page")
-                        s_t.tx("[>] COMPLETED")
-                        s_t.tx(f"MAIL FROM: {fetch_json['mail_from']}")
-                        s_t.tx(f"MAIL SUBJECT: {fetch_json['mail_subject']}")
-                        s_t.md(fetch_json["mail_body"],
-                                  unsafe_allow_html=True)
-                        delete_mail = f"http://api.guerrillamail.com/ajax.php?f=del_email&email_ids[]={mail_id}"
-                        r_q.get(delete_mail)
-                        i_s.i("MAIL HAS BEEN DELETED")
-                        r_q.close()
+                    fetch_json = json.loads(fetch_get.text)
+                    s_t.tx("[>] Be sure to save the message before closing or refreshing the page")
+                    s_t.tx("[>] COMPLETED")
+                    s_t.tx(f"MAIL FROM: {fetch_json['mail_from']}")
+                    s_t.tx(f"MAIL SUBJECT: {fetch_json['mail_subject']}")
+                    s_t.md(fetch_json["mail_body"],
+                           unsafe_allow_html=True)
+                    delete_mail = f"http://api.guerrillamail.com/ajax.php?f=del_email&email_ids[]={mail_id}"
+                    r_q.get(delete_mail)
+                    i_s.i("MAIL HAS BEEN DELETED")
+                    r_q.close()
                 except:
                     i_s.w("MAIL MAY BE DELETED OR NOT YET AVAILABLE, CHECK LATER")
         except:
